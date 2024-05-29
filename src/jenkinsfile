@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+    
+    environment {
+        FLASK_HOME = tool name: 'flask', type: 'hudson.plugins.flask.FLASKInstallation'
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
+        DOCKER_IMAGE_NAME = "davidokpe/ms1-app"
+    }
+
+    stages {
+        stage("Build Application") {
+            steps {
+                script {
+                    echo "Building the application..."
+                    sh "${env.FLASK_HOME}/bin/flask package"
+                }
+            }
+        }
+
+        stage("Build Docker Image") {
+            steps {
+                script {
+                    echo "Building the Docker image..."
+                    docker.build(env.DOCKER_IMAGE_NAME, ".")
+                }
+            }
+        }
+
+        stage("Push Docker Image") {
+            steps {
+                script {
+                    echo "Pushing the Docker image to Docker Hub..."
+                    docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_HUB_CREDENTIALS) {
+                        docker.image(env.DOCKER_IMAGE_NAME).push()
+                    }
+                }
+            }
+        }
+
+        stage("Deploy") {
+            steps {
+                script {
+                    echo "Deploying the application..."
+                    // Add deployment steps here if needed
+                }
+            }
+        }
+    }
+}
