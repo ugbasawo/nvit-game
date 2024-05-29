@@ -2,26 +2,16 @@ pipeline {
     agent any
     
     environment {
-        PYTHON_HOME = tool name: 'Python', type: 'hudson.plugins.python.PythonInstallation'
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
         DOCKER_IMAGE_NAME = "davidokpe/ms1-app"
     }
 
     stages {
-        stage("Build Application") {
-            steps {
-                script {
-                    echo "Building the application..."
-                    sh "pip install -r requirements.txt"
-                }
-            }
-        }
-
         stage("Build Docker Image") {
             steps {
                 script {
                     echo "Building the Docker image..."
-                    docker.build(env.DOCKER_IMAGE_NAME, ".")
+                    docker.build(env.DOCKER_IMAGE_NAME, "-f Dockerfile .")
                 }
             }
         }
