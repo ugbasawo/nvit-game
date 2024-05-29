@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_CREDENTIALS_ID = 'dockerhub' // Updated credentials ID
+        DOCKER_IMAGE_NAME = 'davidokpe/ms1'
+    }
+
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build DOCKER_IMAGE_NAME
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        docker.withRegistry('https://index.docker.io/v1/', 'dockerhub_credentials') {
+                            docker.image(DOCKER_IMAGE_NAME).push()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline succeeded! Docker image has been built and pushed to Docker Hub.'
+        }
+        failure {
+            echo 'Pipeline failed! Please check the build logs for details.'
+        }
+    }
+}
