@@ -7,6 +7,24 @@ pipeline {
     }
 
     stages {
+        stage("Install Docker") {
+            steps {
+                script {
+                    // Check if Docker is already installed
+                    def dockerVersion = sh(script: 'docker --version', returnStdout: true).trim()
+                    if (dockerVersion.contains("Docker version")) {
+                        echo "Docker is already installed: $dockerVersion"
+                    } else {
+                        echo "Installing Docker..."
+                        // Install Docker
+                        sh 'curl -fsSL https://get.docker.com -o get-docker.sh'
+                        sh 'sudo sh get-docker.sh'
+                        sh 'sudo usermod -aG docker $USER' // Add current user to the docker group
+                    }
+                }
+            }
+        }
+
         stage("Build Docker Image") {
             steps {
                 script {
