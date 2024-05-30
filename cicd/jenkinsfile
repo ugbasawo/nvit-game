@@ -1,24 +1,17 @@
 pipeline {
     agent {
-        any
+        docker {
+            image 'docker:stable'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
         environment {
             DOCKER_HOME = '/usr/bin/docker'
+            DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
+            DOCKER_IMAGE_NAME = "davidokpe/ms1-app"
         }
     }
-    
-    environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
-        DOCKER_IMAGE_NAME = "davidokpe/ms1-app"
-    }
-
     stages {
         stage("Build Docker Image") {
-            agent {
-                docker {
-                    image 'docker:stable'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
-                }
-            }
             steps {
                 script {
                     echo "Building the Docker image..."
@@ -26,24 +19,16 @@ pipeline {
                 }
             }
         }
-
         stage("Push Docker Image") {
-            agent {
-                docker {
-                    image 'docker:stable'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
-                }
-            }
             steps {
                 script {
                     echo "Pushing the Docker image to Docker Hub..."
-                    docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_HUB_CREDENTIALS) {
+                    docker.withRegistry('(link unavailable)', env.DOCKER_HUB_CREDENTIALS) {
                         docker.image(env.DOCKER_IMAGE_NAME).push()
                     }
                 }
             }
         }
-
         stage("Deploy") {
             steps {
                 script {
