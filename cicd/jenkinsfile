@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'docker:stable'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
     
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
@@ -13,6 +8,12 @@ pipeline {
 
     stages {
         stage("Build Docker Image") {
+            agent {
+                docker {
+                    image 'docker:stable'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
             steps {
                 script {
                     echo "Building the Docker image..."
@@ -22,6 +23,12 @@ pipeline {
         }
 
         stage("Push Docker Image") {
+            agent {
+                docker {
+                    image 'docker:stable'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
             steps {
                 script {
                     echo "Pushing the Docker image to Docker Hub..."
