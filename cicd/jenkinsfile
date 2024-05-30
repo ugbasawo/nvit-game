@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'docker:stable'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
     
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
@@ -7,16 +12,6 @@ pipeline {
     }
 
     stages {
-        stage("Install Docker") {
-            steps {
-                script {
-                    echo "Installing Docker..."
-                    sh 'curl -fsSL https://get.docker.com -o get-docker.sh'
-                    sh 'sh get-docker.sh' // Removed sudo command
-                }
-            }
-        }
-        
         stage("Build Docker Image") {
             steps {
                 script {
