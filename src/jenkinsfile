@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        any
+        environment {
+            DOCKER_HOME = '/usr/bin/docker'
+        }
+    }
     
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
