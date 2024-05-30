@@ -6,11 +6,20 @@ pipeline {
         }
     }
     environment {
-        DOCKER_HOME = '/usr/bin/docker'
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
         DOCKER_IMAGE_NAME = "davidokpe/ms1-app"
     }
     stages {
+        stage('Initialize') {
+            steps {
+                script {
+                    // Define the Docker tool
+                    def dockerHome = tool 'docker'
+                    // Add Docker binary to PATH
+                    env.PATH = "${dockerHome}/bin:${env.PATH}"
+                }
+            }
+        }
         stage("Build Docker Image") {
             steps {
                 sh 'docker build -t $DOCKER_IMAGE_NAME .'
