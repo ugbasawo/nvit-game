@@ -7,6 +7,16 @@ pipeline {
     }
 
     stages {
+        stage("Install Docker") {
+            steps {
+                script {
+                    echo "Installing Docker..."
+                    sh 'curl -fsSL https://get.docker.com -o get-docker.sh'
+                    sh 'sudo sh get-docker.sh'
+                }
+            }
+        }
+        
         stage("Build Docker Image") {
             steps {
                 script {
