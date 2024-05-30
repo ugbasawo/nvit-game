@@ -1,40 +1,25 @@
 pipeline {
     agent {
         docker {
-            image 'docker:stable'
+            image 'docker:latest'
             args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
-        environment {
-            DOCKER_HOME = '/usr/bin/docker'
-            DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
-            DOCKER_IMAGE_NAME = "davidokpe/ms1-app"
-        }
+    }
+    environment {
+        DOCKER_HOME = '/usr/bin/docker'
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
+        DOCKER_IMAGE_NAME = "davidokpe/ms1-app"
     }
     stages {
         stage("Build Docker Image") {
             steps {
-                script {
-                    echo "Building the Docker image..."
-                    docker.build(env.DOCKER_IMAGE_NAME, "-f Dockerfile .")
-                }
+                sh 'docker build -t $DOCKER_IMAGE_NAME .'
             }
         }
         stage("Push Docker Image") {
             steps {
-                script {
-                    echo "Pushing the Docker image to Docker Hub..."
-                    docker.withRegistry('(link unavailable)', env.DOCKER_HUB_CREDENTIALS) {
-                        docker.image(env.DOCKER_IMAGE_NAME).push()
-                    }
-                }
-            }
-        }
-        stage("Deploy") {
-            steps {
-                script {
-                    echo "Deploying the application..."
-                    // Add deployment steps here if needed
-                }
+                sh 'docker login -u $DOCKER_HUB_CREDENTIALS_USR -p $DOCKER_HUB_CREDENTIALS_PSW'
+                sh 'docker push $DOCKER_IMAGE_NAME'
             }
         }
     }
