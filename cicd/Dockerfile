@@ -1,15 +1,6 @@
-FROM python:3.9-slim
-
+FROM python:3.6
+COPY ./src/ /app
 WORKDIR /app
-
-COPY requirements.txt .
-
 RUN pip install -r requirements.txt
-
-COPY . .
-
-ENV PORT 5000
-
-EXPOSE $PORT
-
-CMD ["python", "app.py"]
+ENTRYPOINT ["python"]
+CMD ["app.py"]
