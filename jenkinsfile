@@ -6,12 +6,13 @@ pipeline {
     environment {
         DOCKER_HUB_CREDENTIALS = 'docker-hub'
         DOCKER_IMAGE_NAME = 'davidokpe/ms1-app'
+        PYTHON_EXECUTABLE = '/usr/bin/python3'
     }
 
     stages {
         stage('Build') {
             steps {
-                sh 'python app.py'
+                sh "${PYTHON_EXECUTABLE} app.py"
             }
             post {
                 success {
