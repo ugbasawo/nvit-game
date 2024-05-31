@@ -12,4 +12,4 @@ ENV PORT 5000
 
 EXPOSE $PORT
 
-CMD ["python", "(link unavailable)"]
+CMD ["python", "app.py"]
