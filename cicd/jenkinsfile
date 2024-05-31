@@ -7,10 +7,34 @@ pipeline {
                 sh 'pip install -r requirements.txt'
                 sh 'python (link unavailable) build'
             }
+            post {
+                success {
+                    script {
+                        currentBuild.result = 'SUCCESS'
+                    }
+                }
+                failure {
+                    script {
+                        currentBuild.result = 'FAILURE'
+                    }
+                }
+            }
         }
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t davidokpe/ms1-app .'
+            }
+            post {
+                success {
+                    script {
+                        currentBuild.result = 'SUCCESS'
+                    }
+                }
+                failure {
+                    script {
+                        currentBuild.result = 'FAILURE'
+                    }
+                }
             }
         }
         stage('Push to Docker Hub') {
@@ -20,6 +44,18 @@ pipeline {
                     sh 'docker push davidokpe/ms1-app'
                 }
             }
+            post {
+                success {
+                    script {
+                        currentBuild.result = 'SUCCESS'
+                    }
+                }
+                failure {
+                    script {
+                        currentBuild.result = 'FAILURE'
+                    }
+                }
+            }
         }
     }
     post {
@@ -27,3 +63,4 @@ pipeline {
             sh 'docker rmi davidokpe/ms1-app:latest'
         }
     }
+}
