@@ -1,27 +1,35 @@
 pipeline {
     agent any
-    
+
     environment {
-        IMAGE_NAME = 'davidokpe/ms1-app'
-        TAG = 'latest'
+        DOCKER_HUB_CREDENTIALS = 'docker-hub'
+        DOCKER_IMAGE_NAME = 'davidokpe/ms1-app'
     }
-    
+
     stages {
         stage('Build') {
             steps {
-                script {
-                    docker.build("${IMAGE_NAME}:${TAG}")
+                sh 'python app.py'
+            }
+            post {
+                success {
+                    script {
+                        currentBuild.result = 'SUCCESS'
+                    }
+                }
+                failure {
+                    script {
+                        currentBuild.result = 'FAILURE'
+                    }
                 }
             }
         }
-        stage('Push') {
-            environment {
-                DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
-            }
+        stage('Docker Build & Push') {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKER_HUB_CREDENTIALS) {
-                        docker.image("${IMAGE_NAME}:${TAG}").push()
+                        def dockerImage = docker.build(DOCKER_IMAGE_NAME)
+                        dockerImage.push()
                     }
                 }
             }
