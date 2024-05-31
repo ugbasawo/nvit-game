@@ -1,16 +1,37 @@
-stage('Build') {
-    steps {
-        sh 'python app.py'
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB_CREDENTIALS = 'docker-hub'
+        DOCKER_IMAGE_NAME = 'davidokpe/ms1-app'
     }
-    post {
-        success {
-            script {
-                currentBuild.result = 'SUCCESS'
+
+    stages {
+        stage('Build') {
+            steps {
+                sh 'python app.py'
+            }
+            post {
+                success {
+                    script {
+                        currentBuild.result = 'SUCCESS'
+                    }
+                }
+                failure {
+                    script {
+                        currentBuild.result = 'FAILURE'
+                    }
+                }
             }
         }
-        failure {
-            script {
-                currentBuild.result = 'FAILURE'
+        stage('Docker Build & Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_HUB_CREDENTIALS) {
+                        def dockerImage = docker.build(DOCKER_IMAGE_NAME)
+                        dockerImage.push()
+                    }
+                }
             }
         }
     }
