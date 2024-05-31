@@ -1,26 +1,29 @@
 pipeline {
-    agent {
-        docker {
-            image 'docker:latest'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
-    environment {
-        DOCKER_HOME = '/usr/bin/docker'
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-repo')
-        DOCKER_IMAGE_NAME = "davidokpe/ms1-app"
-    }
+    agent any
+
     stages {
-        stage("Build Docker Image") {
+        stage('Build') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE_NAME .'
+                sh 'pip install -r requirements.txt'
+                sh 'python (link unavailable) build'
             }
         }
-        stage("Push Docker Image") {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker login -u $DOCKER_HUB_CREDENTIALS_USR -p $DOCKER_HUB_CREDENTIALS_PSW'
-                sh 'docker push $DOCKER_IMAGE_NAME'
+                sh 'docker build -t davidokpe/ms1-app .'
+            }
+        }
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+                    sh 'docker push davidokpe/ms1-app'
+                }
             }
         }
     }
-}
+    post {
+        success {
+            sh 'docker rmi davidokpe/ms1-app:latest'
+        }
+    }
