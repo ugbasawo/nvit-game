@@ -2,21 +2,19 @@ pipeline {
     agent any
 
     environment {
-        // Define Docker Hub credentials
         DOCKER_HUB_CREDENTIALS = 'dockerhub-repo'
-        // Define Docker image name
-        DOCKER_IMAGE_NAME = 'davidokpe/ms1-app' // Update 'your-image-name' with your desired image name
-        // Define the Bitbucket repository URL
+        DOCKER_IMAGE_NAME = 'davidokpe/ms1-app'
         GITHUB_REPO_URL = 'https://github.com/ugbasawo/nvit-game.git'
+        EC2_SSH_CREDENTIALS = 'ec2-ssh-key' // Replace this with the ID of your SSH credential
+        EC2_INSTANCE_IP = 'YOUR_EC2_INSTANCE_IP' // Replace this with your actual EC2 instance IP
     }
 
     stages {
         stage('Git Checkout') {
             steps {
                 script {
-                    echo 'Checking out code from githbu repository'
+                    echo 'Checking out code from GitHub repository'
                 }
-                // Clone the github repository and specify the develop branch
                 git credentialsId: 'github-credentials', url: GITHUB_REPO_URL, branch: 'main'
             }
         }
@@ -25,9 +23,7 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image'
-                    // List the contents of the workspace to debug and confirm the presence of Dockerfile
                     sh 'ls -la'
-                    // Build Docker image using Dockerfile in the root directory
                     docker.build(DOCKER_IMAGE_NAME, '-f Dockerfile .')
                 }
             }
@@ -37,10 +33,20 @@ pipeline {
             steps {
                 script {
                     echo 'Pushing Docker image to Docker Hub'
-                    // Authenticate with Docker Hub
                     docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
-                        // Push Docker image to Docker Hub
                         docker.image(DOCKER_IMAGE_NAME).push('latest')
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                script {
+                    echo 'Deploying to EC2'
+                    sh 'wget -O docker-compose.yaml ${GITHUB_REPO_URL}/docker-compose.yaml'
+                    sshagent(credentials: ['${EC2_SSH_CREDENTIALS}']) {
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@${EC2_INSTANCE_IP} 'docker-compose -f docker-compose.yaml up -d'"
                     }
                 }
             }
