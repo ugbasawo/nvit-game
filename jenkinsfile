@@ -6,7 +6,7 @@ pipeline {
         DOCKER_IMAGE_NAME = 'davidokpe/ms1-app'
         GITHUB_REPO_URL = 'https://github.com/ugbasawo/nvit-game.git'
         EC2_SSH_CREDENTIALS = 'ec2-ssh-key' // Replace this with the ID of your SSH credential
-        EC2_INSTANCE_IP = 'YOUR_EC2_INSTANCE_IP' // Replace this with your actual EC2 instance IP
+        EC2_INSTANCE_IP = '35.91.57.145' // Replace this with your actual EC2 instance IP
     }
 
     stages {
@@ -45,8 +45,8 @@ pipeline {
                 script {
                     echo 'Deploying to EC2'
                     sshagent(credentials: ['${EC2_SSH_CREDENTIALS}']) {
-                        sh "scp -o StrictHostKeyChecking=no -r ./* ec2-user@${EC2_INSTANCE_IP}:~/"
-                        sh "ssh -o StrictHostKeyChecking=no ec2-user@${EC2_INSTANCE_IP} 'docker run -d -p 80:80 ${DOCKER_IMAGE_NAME}'"
+                        sh "scp -o StrictHostKeyChecking=no -r ./* ubuntu@${EC2_INSTANCE_IP}:~/"
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_INSTANCE_IP} 'docker run -d -p 80:80 ${DOCKER_IMAGE_NAME}'"
                     }
                 }
             }
