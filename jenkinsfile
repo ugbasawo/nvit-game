@@ -44,9 +44,9 @@ pipeline {
             steps {
                 script {
                     echo 'Deploying to EC2'
-                    sh 'wget -O docker-compose.yaml ${GITHUB_REPO_URL}/docker-compose.yaml'
                     sshagent(credentials: ['${EC2_SSH_CREDENTIALS}']) {
-                        sh "ssh -o StrictHostKeyChecking=no ec2-user@${EC2_INSTANCE_IP} 'docker-compose -f docker-compose.yaml up -d'"
+                        sh "scp -o StrictHostKeyChecking=no -r ./* ec2-user@${EC2_INSTANCE_IP}:~/"
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@${EC2_INSTANCE_IP} 'docker run -d -p 80:80 ${DOCKER_IMAGE_NAME}'"
                     }
                 }
             }
