@@ -5,7 +5,7 @@ pipeline {
         DOCKER_HUB_CREDENTIALS = 'dockerhub-repo'
         DOCKER_IMAGE_NAME = 'davidokpe/ms1-app'
         GITHUB_REPO_URL = 'https://github.com/ugbasawo/nvit-game.git'
-        EC2_SSH_CREDENTIALS = 'ec2-instance' // Replace this with the ID of your SSH credential
+        EC2_SSH_CREDENTIALS = 'my-ec2-ssh-credentials' // Replace this with the ID of your SSH credential
         EC2_INSTANCE_IP = '35.95.124.42' // Replace this with your actual EC2 instance IP
     }
 
