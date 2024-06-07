@@ -1,53 +1,32 @@
 pipeline {
     agent any
-
     environment {
         DOCKER_HUB_CREDENTIALS = 'dockerhub-repo'
         DOCKER_IMAGE_NAME = 'davidokpe/ms1-app'
         GITHUB_REPO_URL = 'https://github.com/ugbasawo/nvit-game.git'
-        EC2_SSH_CREDENTIALS = 'my-ec2-ssh-credentials' // Replace this with the ID of your SSH credential
-        EC2_INSTANCE_IP = '35.95.124.42' // Replace this with your actual EC2 instance IP
+        EC2_INSTANCE_IP = '35.95.149.89'
     }
-
     stages {
         stage('Git Checkout') {
             steps {
-                script {
-                    echo 'Checking out code from GitHub repository'
-                }
-                git credentialsId: 'github-credentials', url: GITHUB_REPO_URL, branch: 'main'
+                git url: GITHUB_REPO_URL, branch: 'main'
             }
         }
-
         stage('Build Docker Image') {
             steps {
-                script {
-                    echo 'Building Docker image'
-                    sh 'ls -la'
-                    docker.build(DOCKER_IMAGE_NAME, '-f Dockerfile .')
-                }
+                sh 'docker build -t ${DOCKER_IMAGE_NAME} .'
             }
         }
-
         stage('Push Docker Image to Docker Hub') {
             steps {
-                script {
-                    echo 'Pushing Docker image to Docker Hub'
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
-                        docker.image(DOCKER_IMAGE_NAME).push('latest')
-                    }
-                }
+                sh 'docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}'
+                sh 'docker push ${DOCKER_IMAGE_NAME}'
             }
         }
-
         stage('Deploy to EC2') {
             steps {
-                script {
-                    echo 'Deploying to EC2'
-                    sshagent(credentials: ['${EC2_SSH_CREDENTIALS}']) {
-                        sh "scp -o StrictHostKeyChecking=no -r ./* ubuntu@${EC2_INSTANCE_IP}:~/"
-                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_INSTANCE_IP} 'docker run -d -p 80:80 ${DOCKER_IMAGE_NAME}'"
-                    }
+                sshagent(credentials: ['EC2 SSH Key']) {
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@${EC2_INSTANCE_IP} "docker run -d -p 80:80 ${DOCKER_IMAGE_NAME}"'
                 }
             }
         }
