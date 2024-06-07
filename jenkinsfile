@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Push Docker Image to Docker Hub') {
             steps {
-                sh 'docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}'
+                sh 'docker login -u ${davidokpe} -p ${Salome@123}'
                 sh 'docker push ${DOCKER_IMAGE_NAME}'
             }
         }
