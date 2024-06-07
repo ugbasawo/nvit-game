@@ -25,7 +25,7 @@ pipeline {
         }
         stage('Deploy to EC2') {
             steps {
-                sshagent(credentials: ['EC2 SSH Key']) {
+                sshagent(credentials: ['EC2-SSH-Key']) {
                     sh 'ssh -o StrictHostKeyChecking=no ubuntu@${EC2_INSTANCE_IP} "docker run -d -p 80:80 ${DOCKER_IMAGE_NAME}"'
                 }
             }
