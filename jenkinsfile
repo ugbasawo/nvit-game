@@ -20,8 +20,8 @@ pipeline {
         stage('Push Docker Image to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-repo', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                    sh 'sudo docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
-                    sh 'sudo docker push ${DOCKER_IMAGE_NAME}'
+                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+                    sh 'docker push ${DOCKER_IMAGE_NAME}'
                 }
             }
         }
