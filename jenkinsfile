@@ -4,7 +4,7 @@ pipeline {
         DOCKER_HUB_CREDENTIALS = 'dockerhub-repo'
         DOCKER_IMAGE_NAME = 'davidokpe/ms1-app'
         GITHUB_REPO_URL = 'https://github.com/ugbasawo/nvit-game.git'
-        EC2_INSTANCE_IP = '35.95.149.89'
+        EC2_INSTANCE_IP = '35.95.148.18'
     }
     stages {
         stage('Git Checkout') {
