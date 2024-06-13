@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_HUB_CREDENTIALS = 'dockerhub-repo'
-        DOCKER_IMAGE_NAME = 'davidokpe/ms1-app'
+        DOCKER_IMAGE_NAME = 'davidokpe/ms2-app'
         GITHUB_REPO_URL = 'https://github.com/ugbasawo/nvit-game.git'
         EC2_INSTANCE_IP = '34.221.113.197'
     }
