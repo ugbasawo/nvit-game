@@ -2,33 +2,54 @@ pipeline {
     agent any
     environment {
         DOCKER_HUB_CREDENTIALS = 'dockerhub-repo'
-        DOCKER_IMAGE_NAME = 'davidokpe/ms2-app'
-        GITHUB_REPO_URL = 'https://github.com/ugbasawo/nvit-game.git'
-        EC2_INSTANCE_IP = '34.221.113.197'
+        IMAGE1_NAME = 'davidokpe/nvit-gameapp1'
+        IMAGE2_NAME = 'davidokpe/nvit-gameapp2'
+        REPO1_URL = 'https://github.com/ugbasawo/nvit-game.git'
+        REPO2_URL = 'https://github.com/ugbasawo/ms2-app.git'
+        EC2_INSTANCE_IP = '34.221.229.177'
     }
     stages {
         stage('Git Checkout') {
             steps {
-                git url: GITHUB_REPO_URL, branch: 'main'
-            }
-        }
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t ${DOCKER_IMAGE_NAME} .'
-            }
-        }
-        stage('Push Docker Image to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-repo', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
-                    sh 'docker push ${DOCKER_IMAGE_NAME}'
+                dir('nvit-gameapp1') {
+                    git url: REPO1_URL, branch: 'main'
+                }
+                dir('nvit-gameapp2') {
+                    git url: REPO2_URL, branch: 'main'
                 }
             }
         }
-        stage('Deploy to EC2') {
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    // Build the first Docker image
+                    dir('nvit-gameapp1') {
+                        sh 'docker build -t ${IMAGE1_NAME} -f Dockerfile .'
+                    }
+                    // Build the second Docker image
+                    dir('nvit-gameapp2') {
+                        sh 'docker build -t ${IMAGE2_NAME} -f Dockerfile .'
+                    }
+                }
+            }
+        }
+        stage('Push Docker Images to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-repo', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+                    sh 'docker push ${IMAGE1_NAME}'
+                    sh 'docker push ${IMAGE2_NAME}'
+                }
+            }
+        }
+        stage('Deploy with Docker Compose to EC2') {
             steps {
                 sshagent(credentials: ['EC2-SSH-Key']) {
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@${EC2_INSTANCE_IP} "sudo docker run -d -p 2000:2000 ${DOCKER_IMAGE_NAME}"'
+                    // Copy the compose file to the EC2 instance
+                    sh 'scp -o StrictHostKeyChecking=no compose.yml ubuntu@${EC2_INSTANCE_IP}:/home/ubuntu/compose.yml'
+                    
+                    // Deploy using docker-compose with sudo
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@${EC2_INSTANCE_IP} "sudo docker-compose -f /home/ubuntu/compose.yaml up -d"'
                 }
             }
         }
