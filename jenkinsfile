@@ -49,7 +49,7 @@ pipeline {
                     sh 'scp -o StrictHostKeyChecking=no compose.yml ubuntu@${EC2_INSTANCE_IP}:/home/ubuntu/compose.yml'
                     
                     // Deploy using docker-compose with sudo
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@${EC2_INSTANCE_IP} "sudo docker-compose -f /home/ubuntu/compose.yaml up -d"'
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@${EC2_INSTANCE_IP} "sudo docker-compose -f /home/ubuntu/compose.yml up -d"'
                 }
             }
         }
