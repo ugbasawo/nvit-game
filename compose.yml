@@ -1,11 +1,11 @@
 version: '3.8'
 services:
   gameapp1:
-    image: nvit-gameapp1:latest
+    image: davidokpe/nvit-gameapp1:lts
     ports:
       - "5000:5000"
 
   gameapp2:
-    image: nvit-gameapp2:latest
+    image: davidokpe/nvit-gameapp2:lts
     ports:
       - "5001:5001"
