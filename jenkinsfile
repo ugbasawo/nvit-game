@@ -2,54 +2,41 @@ pipeline {
     agent any
     environment {
         DOCKER_HUB_CREDENTIALS = 'dockerhub-repo'
-        IMAGE1_NAME = 'davidokpe/nvit-gameapp1'
-        IMAGE2_NAME = 'davidokpe/nvit-gameapp2'
-        REPO1_URL = 'https://github.com/ugbasawo/nvit-game.git'
-        REPO2_URL = 'https://github.com/ugbasawo/ms2-app.git'
-        EC2_INSTANCE_IP = '34.221.229.177'
+        IMAGE_NAME = 'davidokpe/nvit-gameapp1'
+        REPO_URL = 'https://github.com/ugbasawo/nvit-game.git'
+        manifest_file = 'deployment.yaml'  // Changed to lowercase
     }
     stages {
         stage('Git Checkout') {
             steps {
-                dir('nvit-gameapp1') {
-                    git url: REPO1_URL, branch: 'main'
-                }
-                dir('nvit-gameapp2') {
-                    git url: REPO2_URL, branch: 'main'
+                dir('nvit-gameapp') {
+                    git url: REPO_URL, branch: 'main'
                 }
             }
         }
-        stage('Build Docker Images') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the first Docker image
-                    dir('nvit-gameapp1') {
-                        sh 'docker build -t ${IMAGE1_NAME} -f Dockerfile .'
-                    }
-                    // Build the second Docker image
-                    dir('nvit-gameapp2') {
-                        sh 'docker build -t ${IMAGE2_NAME} -f Dockerfile .'
+                    // Build the Docker image
+                    dir('nvit-gameapp') {
+                        sh 'docker build -t ${IMAGE_NAME} -f Dockerfile .'
                     }
                 }
             }
         }
-        stage('Push Docker Images to Docker Hub') {
+        stage('Push Docker Image to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-repo', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                     sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
-                    sh 'docker push ${IMAGE1_NAME}'
-                    sh 'docker push ${IMAGE2_NAME}'
+                    sh 'docker push ${IMAGE_NAME}'
                 }
             }
         }
-        stage('Deploy with Docker Compose to EC2') {
+        stage('Deploy Using Manifest File') {
             steps {
-                sshagent(credentials: ['EC2-SSH-Key']) {
-                    // Copy the compose file to the EC2 instance
-                    sh 'scp -o StrictHostKeyChecking=no compose.yml ubuntu@${EC2_INSTANCE_IP}:/home/ubuntu/compose.yml'
-                    
-                    // Deploy using docker-compose with sudo
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@${EC2_INSTANCE_IP} "sudo docker-compose -f /home/ubuntu/compose.yml up -d"'
+                script {
+                    // Apply the manifest file using kubectl
+                    sh 'kubectl apply -f ${manifest_file}'  // Updated to use the lowercase variable
                 }
             }
         }
