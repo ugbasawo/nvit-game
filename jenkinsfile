@@ -4,7 +4,6 @@ pipeline {
         DOCKER_HUB_CREDENTIALS = 'dockerhub-repo'
         IMAGE_NAME = 'davidokpe/nvit-gameapp1'
         REPO_URL = 'https://github.com/ugbasawo/nvit-game.git'
-        manifest_file = 'deployment.yaml'  // Changed to lowercase
     }
     stages {
         stage('Git Checkout') {
@@ -29,14 +28,6 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-repo', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                     sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
                     sh 'docker push ${IMAGE_NAME}'
-                }
-            }
-        }
-        stage('Deploy Using Manifest File') {
-            steps {
-                script {
-                    // Apply the manifest file using kubectl
-                    sh 'kubectl apply -f ${manifest_file}'  // Updated to use the lowercase variable
                 }
             }
         }
