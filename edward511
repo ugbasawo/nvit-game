@@ -2,8 +2,8 @@ pipeline {
     agent any
     environment {
         DOCKER_HUB_CREDENTIALS = 'dockerhub-repo'
-        IMAGE_NAME = 'davidokpe/nvit-game'
-        REPO_URL = 'https://github.com/ugbasawo/nvit-game.git'
+        IMAGE_NAME = 'edwardsamson/nvit-game'
+        REPO_URL = ''https://github.com/edward511/nvit-game.git
     }
     stages {
         stage('Git Checkout') {
