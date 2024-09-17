@@ -1,61 +1,31 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: gameapp-namespace
-
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gameapp1-deployment
-  namespace: gameapp-namespace
+  name: nvit-app-deployment
+  namespace: default  # Update this if you have a specific namespace
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gameapp1
+      app: nvit-app
   template:
     metadata:
       labels:
-        app: gameapp1
+        app: nvit-app
     spec:
       containers:
-        - name: gameapp1
-          image: nvit-gameapp1:latest
+        - name: nvit-app
+          image: davidokpe/nvit-app:latest
           ports:
             - containerPort: 5000
 
 ---
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: gameapp2-deployment
-  namespace: gameapp-namespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: gameapp2
-  template:
-    metadata:
-      labels:
-        app: gameapp2
-    spec:
-      containers:
-        - name: gameapp2
-          image: nvit-gameapp2:latest
-          ports:
-            - containerPort: 5001
-
----
-
 apiVersion: v1
 kind: Service
 metadata:
-  name: gameapp1-service
-  namespace: gameapp-namespace
+  name: nvit-app-service
+  namespace: default  # Update this if you have a specific namespace
 spec:
   type: NodePort
   ports:
@@ -63,20 +33,4 @@ spec:
       targetPort: 5000
       nodePort: 30001
   selector:
-    app: gameapp1
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: gameapp2-service
-  namespace: gameapp-namespace
-spec:
-  type: NodePort
-  ports:
-    - port: 5001
-      targetPort: 5001
-      nodePort: 30002
-  selector:
-    app: gameapp2
+    app: nvit-app
