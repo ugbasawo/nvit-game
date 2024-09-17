@@ -31,5 +31,13 @@ pipeline {
                 }
             }
         }
+        stage('Deploy with manifest.yaml') {
+            steps {
+                script {
+                    // Deploy using the manifest.yaml file
+                    sh 'kubectl apply -f manifest.yaml'
+                }
+            }
+        }
     }
 }
