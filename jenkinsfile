@@ -6,6 +6,11 @@ pipeline {
         REPO_URL = 'https://github.com/ugbasawo/nvit-game.git'
     }
     stages {
+        stage('Check Docker Compose Version') {
+            steps {
+                sh 'docker-compose --version'
+            }
+        }
         stage('Git Checkout') {
             steps {
                 dir('nvit-gameapp') {
@@ -13,14 +18,23 @@ pipeline {
                 }
             }
         }
+        stage('Login to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: DOCKER_HUB_CREDENTIALS, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    }
+                }
+            }
+        }
         stage('Build and Push with Docker Compose') {
             steps {
                 script {
-                    // Change to the directory with the docker-compose file
                     dir('nvit-gameapp') {
-                        // Build and push the Docker image using docker-compose
-                        sh 'docker-compose build'
-                        sh 'docker-compose push'
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh 'docker-compose build'
+                            sh 'docker-compose push'
+                        }
                     }
                 }
             }
@@ -28,9 +42,8 @@ pipeline {
         stage('Deploy with Docker Compose Up') {
             steps {
                 script {
-                    // Start the containers using docker-compose
                     dir('nvit-gameapp') {
-                        sh 'docker-compose up -d' // The -d flag runs containers in detached mode
+                        sh 'docker-compose up -d'
                     }
                 }
             }
