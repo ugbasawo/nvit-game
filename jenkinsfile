@@ -25,7 +25,7 @@ pipeline {
         }
         stage('Push Docker Image to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-repo', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                withCredentials([usernamePassword(credentialsId: DOCKER_HUB_CREDENTIALS, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                     sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
                     sh 'docker push ${IMAGE_NAME}'
                 }
@@ -34,8 +34,8 @@ pipeline {
         stage('Deploy with manifest.yaml') {
             steps {
                 script {
-                    // Deploy using the manifest.yaml file
-                    sh 'microk8s kubectl apply -f manifest.yaml'
+                    // Use the full path to microk8s.kubectl
+                    sh '/snap/bin/microk8s.kubectl apply -f manifest.yaml'
                 }
             }
         }
