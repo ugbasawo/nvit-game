@@ -13,29 +13,25 @@ pipeline {
                 }
             }
         }
-        stage('Build Docker Image') {
+        stage('Build and Push with Docker Compose') {
             steps {
                 script {
-                    // Build the Docker image
+                    // Change to the directory with the docker-compose file
                     dir('nvit-gameapp') {
-                        sh 'docker build -t ${IMAGE_NAME} -f Dockerfile .'
+                        // Build and push the Docker image using docker-compose
+                        sh 'docker-compose build'
+                        sh 'docker-compose push'
                     }
                 }
             }
         }
-        stage('Push Docker Image to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: DOCKER_HUB_CREDENTIALS, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
-                    sh 'docker push ${IMAGE_NAME}'
-                }
-            }
-        }
-        stage('Deploy with manifest.yaml') {
+        stage('Deploy with Docker Compose Up') {
             steps {
                 script {
-                    // Use the full path to microk8s.kubectl
-                    sh '/snap/bin/microk8s.kubectl apply -f manifest.yaml'
+                    // Start the containers using docker-compose
+                    dir('nvit-gameapp') {
+                        sh 'docker-compose up -d' // The -d flag runs containers in detached mode
+                    }
                 }
             }
         }
