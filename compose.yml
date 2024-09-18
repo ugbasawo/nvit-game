@@ -4,8 +4,3 @@ services:
     image: davidokpe/nvit-gameapp1:lts
     ports:
       - "5000:5000"
-
-  gameapp2:
-    image: davidokpe/nvit-gameapp2:lts
-    ports:
-      - "5001:5001"
